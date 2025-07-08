@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <meta charset="UTF-8">
+  <title>MVP de IA - Upload de Imagem</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h1 {
+      color: #007BFF;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+
+    input[type="file"] {
+      margin-top: 20px;
+    }
+
+    img {
+      margin-top: 20px;
+      max-width: 100%;
+      height: auto;
+      border: 2px dashed #007BFF;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Reconhecimento de Imagem</h1>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
+      <label for="imageInput">Escolha uma imagem:</label><br>
+      <input type="file" id="imageInput" name="image" accept="image/*" required>
+      <br>
+      <img id="preview" src="#" alt="Pré-visualização da Imagem" style="display:none;">
+      <br>
+      <button type="submit">Enviar Imagem</button>
+      <br><br>
+      <p id="alvoNumero" style="font-size: 18px; margin-top: 20px;">Desenhe o número: <span id="numeroAlvoValor"></span></p>
+      <canvas id="canvas" width="280" height="280" style="border:1px solid #007BFF; border-radius: 8px;"></canvas><br>
+      <button type="button" onclick="clearCanvas()">Limpar Desenho</button>
+      <button type="button" onclick="reconhecerDesenho()">Reconhecer Desenho</button>
+      <p id="resultado" style="font-size: 20px; font-weight: bold;"></p>
+      <audio id="acertoSom" src="/static/acerto.mp3" preload="auto"></audio>
+      <audio id="erroSom" src="/static/erro.mp3" preload="auto"></audio>
+
+    </form>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+
+    imageInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          preview.setAttribute("src", e.target.result);
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.setAttribute("src", "#");
+        preview.style.display = "none";
+      }
+    });
+  </script>
+
+  <!-- ✅ Arquivo JS externo (fora das tags <script>) -->
+  <script src="{{ url_for('static', filename='gerarnovoalvo.js') }}"></script>
+</body>
+</html>
+
+
+</body>
+
+</html>
