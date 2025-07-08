@@ -1,109 +1,177 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <meta charset="UTF-8">
-  <title>MVP de IA - Upload de Imagem</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f4f4f4;
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <title>Aprendendo os Números!</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f8ff; /* Azul céu claro */
+            color: #333;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    h1 {
-      color: #007BFF;
-    }
+        .container {
+            background: white;
+            padding: 25px 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
 
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      max-width: 600px;
-      margin: auto;
-      text-align: center;
-    }
+        h1 {
+            font-family: 'Fredoka One', cursive; /* Fonte mais divertida */
+            color: #ff6347; /* Tomate */
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        /* Estilo para o texto de instrução */
+        .instrucao-texto {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
 
-    input[type="file"] {
-      margin-top: 20px;
-    }
+        #alvoNumero {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5em; /* Número alvo bem grande */
+            font-weight: bold;
+            color: #007BFF;
+            margin: 10px 0;
+            /* Adiciona um espaço para a dica numérica não empurrar o layout */
+            min-height: 60px; 
+        }
 
-    img {
-      margin-top: 20px;
-      max-width: 100%;
-      height: auto;
-      border: 2px dashed #007BFF;
-      border-radius: 8px;
-      padding: 10px;
-    }
+        /* Estilo para a dica numérica que aparece */
+        #numeroDica {
+            color: #28a745; /* Verde */
+            margin-left: 15px;
+        }
 
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        canvas {
+            border: 4px dashed #ffb6c1; /* Rosa claro pontilhado */
+            border-radius: 15px;
+            background-color: #ffffff;
+            cursor: crosshair;
+            margin-top: 10px;
+        }
 
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+        .botoes-container {
+            margin-top: 20px;
+        }
+
+        button {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2em;
+            padding: 12px 25px;
+            margin: 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-enviar {
+            background-color: #28a745; /* Verde sucesso */
+            color: white;
+        }
+
+        .btn-limpar {
+            background-color: #ffc107; /* Amarelo aviso */
+            color: white;
+        }
+        
+        .btn-ajuda {
+            background-color: #17a2b8; /* Azul informação */
+            color: white;
+        }
+
+        #resultado {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 20px;
+            height: 30px; /* Garante espaço para a mensagem */
+        }
+    </style>
 </head>
-
 <body>
-  <div class="container">
-    <h1>Reconhecimento de Imagem</h1>
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
-      <label for="imageInput">Escolha uma imagem:</label><br>
-      <input type="file" id="imageInput" name="image" accept="image/*" required>
-      <br>
-      <img id="preview" src="#" alt="Pré-visualização da Imagem" style="display:none;">
-      <br>
-      <button type="submit">Enviar Imagem</button>
-      <br><br>
-      <p id="alvoNumero" style="font-size: 18px; margin-top: 20px;">Desenhe o número: <span id="numeroAlvoValor"></span></p>
-      <canvas id="canvas" width="280" height="280" style="border:1px solid #007BFF; border-radius: 8px;"></canvas><br>
-      <button type="button" onclick="clearCanvas()">Limpar Desenho</button>
-      <button type="button" onclick="reconhecerDesenho()">Reconhecer Desenho</button>
-      <p id="resultado" style="font-size: 20px; font-weight: bold;"></p>
-      <audio id="acertoSom" src="/static/acerto.mp3" preload="auto"></audio>
-      <audio id="erroSom" src="/static/erro.mp3" preload="auto"></audio>
+    <div class="container">
+        <h1>Aprendendo os Números!</h1>
+        
+        <p class="instrucao-texto">Desenhe o número que se escreve assim:</p>
+        
+        <p id="alvoNumero">
+            <span id="numeroAlvoValor"></span>
+            <span id="numeroDica" style="display: none;"></span> 
+        </p>
 
-    </form>
-  </div>
+        <canvas id="canvas" width="280" height="280"></canvas>
+        
+        <div class="botoes-container">
+            <button type="button" class="btn-enviar" onclick="reconhecerDesenho()">✔️ Enviar!</button>
+            <button type="button" class="btn-limpar" onclick="clearCanvas()">✏️ Limpar</button>
+            <button type="button" class="btn-ajuda" id="showMeHowBtn" onclick="mostrarDica()">💡 Me mostre</button>
+        </div>
 
-  <script>
-    const imageInput = document.getElementById("imageInput");
-    const preview = document.getElementById("preview");
+        <p id="resultado"></p>
 
-    imageInput.addEventListener("change", function () {
-      const file = this.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          preview.setAttribute("src", e.target.result);
-          preview.style.display = "block";
+        <audio id="acertoSom" src="{{ url_for('static', filename='acerto.mp3') }}" preload="auto"></audio>
+        <audio id="erroSom" src="{{ url_for('static', filename='erro.mp3') }}" preload="auto"></audio>
+    </div>
+
+    <script src="{{ url_for('static', filename='gerarnovoalvo.js') }}"></script>
+
+    <script>
+        // Mapeia o número para sua forma por extenso
+        const numerosPorExtenso = ["ZERO", "UM", "DOIS", "TRÊS", "QUATRO", "CINCO", "SEIS", "SETE", "OITO", "NOVE"];
+        
+        // Esta variável deve ser a mesma do seu arquivo gerarnovoalvo.js
+        // Aqui, estamos assumindo que `numeroAlvo` é uma variável global lá.
+        // O ideal é integrar esta lógica no seu arquivo .js principal.
+        
+        // Atualiza o texto para mostrar o número por extenso
+        function atualizarTextoAlvo() {
+            const spanAlvo = document.getElementById('numeroAlvoValor');
+            const spanDica = document.getElementById('numeroDica');
+            
+            // `numeroAlvo` é a variável do seu outro script
+            if (typeof numeroAlvo !== 'undefined') {
+                spanAlvo.innerText = numerosPorExtenso[numeroAlvo];
+                spanDica.innerText = `(${numeroAlvo})`; // Prepara a dica
+                spanDica.style.display = 'none'; // Garante que a dica comece escondida
+            }
+        }
+
+        function mostrarDica() {
+            const spanDica = document.getElementById('numeroDica');
+            spanDica.style.display = 'inline'; // Mostra a dica
+        }
+
+        // Sobrescreve a função de gerar novo alvo para incluir a atualização do texto
+        const originalGerarNovoAlvo = window.gerarNovoAlvo;
+        window.gerarNovoAlvo = function() {
+            const novoNumero = originalGerarNovoAlvo(); // Chama a função original
+            atualizarTextoAlvo(); // Atualiza o texto com a palavra
+            return novoNumero;
         };
-        reader.readAsDataURL(file);
-      } else {
-        preview.setAttribute("src", "#");
-        preview.style.display = "none";
-      }
-    });
-  </script>
 
-  <!-- ✅ Arquivo JS externo (fora das tags <script>) -->
-  <script src="{{ url_for('static', filename='gerarnovoalvo.js') }}"></script>
+        // Garante que o primeiro número seja exibido corretamente ao carregar a página
+        document.addEventListener('DOMContentLoaded', (event) => {
+            atualizarTextoAlvo();
+        });
+
+    </script>
 </body>
-</html>
-
-
-</body>
-
 </html>
